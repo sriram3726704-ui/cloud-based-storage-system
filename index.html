@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudBox - Cloud-Based File Storage System</title>
+  <meta name="description" content="A modern, student-friendly cloud-based file storage system powered by Firebase Cloud Storage, HTML5, CSS3, and JavaScript.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Cloud<span>Box</span></h1>
+          <span class="brand-tag">Cloud File Storage</span>
+        </div>
+      </div>
+
+      <!-- Storage Usage & Status -->
+      <div class="nav-center">
+        <div class="storage-pill">
+          <div class="storage-info">
+            <span class="storage-label">Storage Used:</span>
+            <span class="storage-value" id="storage-used-text">0 KB</span>
+            <span class="storage-count" id="files-count-badge">0 files</span>
+          </div>
+          <div class="storage-bar-track">
+            <div class="storage-bar-fill" id="storage-bar-fill" style="width: 2%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="nav-actions">
+        <!-- Status Badge -->
+        <div class="status-indicator demo" id="status-badge" title="Storage mode status">
+          <span class="status-dot"></span>
+          <span class="status-label" id="status-text">Checking...</span>
+        </div>
+
+        <button class="btn btn-secondary btn-icon-text" id="open-guide-btn" title="View Step-by-Step Setup Guide">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Guide</span>
+        </button>
+
+        <button class="btn btn-primary btn-icon-text" id="open-config-btn" title="Configure Firebase Credentials">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span>Firebase Setup</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="main-layout">
+    <!-- Notice Banner (Interactive Demo Alert) -->
+    <div class="banner banner-info" id="demo-banner">
+      <div class="banner-content">
+        <span class="banner-icon">⚡</span>
+        <div class="banner-text">
+          <strong>Interactive Demo Mode:</strong> You can upload, view, download, and delete files locally right now. 
+          To store your files in real Google Cloud Storage, connect your Firebase project!
+        </div>
+      </div>
+      <button class="banner-btn" id="banner-setup-btn">Connect Firebase</button>
+    </div>
+
+    <!-- Upload Dropzone Section -->
+    <section class="upload-section">
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="file-input" multiple class="file-input-hidden" aria-label="Select files to upload">
+        <div class="dropzone-content">
+          <div class="upload-graphic">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <h2 class="dropzone-title">Drag & drop files here, or <span class="browse-link">Browse files</span></h2>
+          <p class="dropzone-hint">Supports images, documents, audio, videos, code, and archives (any file type)</p>
+          <div class="upload-meta-pills">
+            <span class="meta-pill">Multiple files supported</span>
+            <span class="meta-pill">Instant preview</span>
+            <span class="meta-pill">Direct cloud download</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload Progress Container -->
+      <div class="upload-progress-list" id="upload-progress-container" style="display: none;">
+        <!-- Dynamic upload progress cards will be inserted here -->
+      </div>
+    </section>
+
+    <!-- Files Management Section -->
+    <section class="files-section">
+      <!-- Toolbar: Search, Filters, View Modes -->
+      <div class="toolbar">
+        <div class="search-box">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search files by name..." autocomplete="off">
+          <button class="clear-search-btn" id="clear-search-btn" style="display: none;" title="Clear search">✕</button>
+        </div>
+
+        <div class="filter-group" id="filter-group">
+          <button class="filter-chip active" data-filter="all">All</button>
+          <button class="filter-chip" data-filter="image">🖼️ Images</button>
+          <button class="filter-chip" data-filter="document">📄 Documents</button>
+          <button class="filter-chip" data-filter="media">🎬 Media</button>
+          <button class="filter-chip" data-filter="archive">📦 Archives</button>
+          <button class="filter-chip" data-filter="other">📁 Other</button>
+        </div>
+
+        <div class="toolbar-controls">
+          <div class="sort-select-wrapper">
+            <select id="sort-select" aria-label="Sort files">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+              <option value="size-desc">Size (Largest)</option>
+              <option value="size-asc">Size (Smallest)</option>
+            </select>
+          </div>
+
+          <div class="view-toggle">
+            <button class="view-btn active" id="view-grid-btn" title="Grid View" aria-label="Grid View">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </button>
+            <button class="view-btn" id="view-list-btn" title="List View" aria-label="List View">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <button class="btn btn-outline btn-icon" id="refresh-btn" title="Refresh Files">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" id="loading-state">
+        <div class="spinner"></div>
+        <p>Loading files from cloud storage...</p>
+      </div>
+
+      <!-- Files Container: Grid or List -->
+      <div class="files-container view-grid" id="files-container">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="empty-state" style="display: none;">
+        <div class="empty-illustration">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            <line x1="12" y1="11" x2="12" y2="17"></line>
+            <line x1="9" y1="14" x2="15" y2="14"></line>
+          </svg>
+        </div>
+        <h3 id="empty-title">No files found</h3>
+        <p id="empty-description">Drag and drop files into the upload box above to store your first cloud file.</p>
+        <button class="btn btn-primary" id="empty-upload-btn">Upload a File</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: File Preview                                                       -->
+  <!-- ========================================================================= -->
+  <div class="modal-overlay" id="preview-modal" style="display: none;">
+    <div class="modal modal-preview">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="file-type-icon" id="preview-modal-icon">📄</span>
+          <h3 class="modal-title" id="preview-modal-title">File Preview</h3>
+        </div>
+        <button class="modal-close-btn" id="close-preview-modal" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body preview-body" id="preview-modal-body">
+        <!-- Preview Content (Image / Video / Audio / Text / Fallback) -->
+      </div>
+      <div class="modal-footer preview-footer">
+        <div class="preview-meta" id="preview-modal-meta">
+          <span id="preview-meta-size">Size: 0 KB</span>
+          <span class="meta-dot">•</span>
+          <span id="preview-meta-date">Date: --</span>
+        </div>
+        <div class="preview-actions">
+          <button class="btn btn-secondary btn-icon-text" id="preview-copy-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>Copy Link</span>
+          </button>
+          <a class="btn btn-primary btn-icon-text" id="preview-download-btn" download target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Download</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Delete Confirmation                                                -->
+  <!-- ========================================================================= -->
+  <div class="modal-overlay" id="delete-modal" style="display: none;">
+    <div class="modal modal-danger">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="danger-icon-circle">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </div>
+          <h3 class="modal-title">Delete File</h3>
+        </div>
+        <button class="modal-close-btn" id="close-delete-modal" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to permanently delete <strong id="delete-file-name" class="highlight-name">filename</strong>?</p>
+        <p class="modal-subtext">This action cannot be undone. The file will be removed from your cloud storage bucket.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-delete-btn">Cancel</button>
+        <button class="btn btn-danger btn-icon-text" id="confirm-delete-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Delete File</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Firebase Configuration                                             -->
+  <!-- ========================================================================= -->
+  <div class="modal-overlay" id="config-modal" style="display: none;">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="firebase-logo-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M4.5 19.5L11.5 3.5L14 9.5L4.5 19.5Z" fill="#FFA000"/>
+              <path d="M14 9.5L16.5 4.5L19.5 19.5L14 9.5Z" fill="#F57C00"/>
+              <path d="M4.5 19.5L12 22L19.5 19.5L14 9.5L4.5 19.5Z" fill="#FFCA28"/>
+            </svg>
+          </div>
+          <h3 class="modal-title">Firebase Cloud Storage Setup</h3>
+        </div>
+        <button class="modal-close-btn" id="close-config-modal" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-subtext">
+          Paste your Firebase project credentials below to connect your real Google Cloud Storage bucket.
+          You can also edit <code class="code-inline">js/firebase-config.js</code> directly in your code editor.
+        </p>
+
+        <!-- Quick paste helper -->
+        <div class="config-tabs">
+          <button class="config-tab active" id="tab-form-btn">Individual Fields</button>
+          <button class="config-tab" id="tab-json-btn">Paste Config Object</button>
+        </div>
+
+        <!-- Form fields view -->
+        <form id="firebase-config-form" class="config-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cfg-apiKey">API Key (apiKey) <span class="required">*</span></label>
+              <input type="text" id="cfg-apiKey" placeholder="AIzaSy..." required>
+            </div>
+            <div class="form-group">
+              <label for="cfg-projectId">Project ID (projectId) <span class="required">*</span></label>
+              <input type="text" id="cfg-projectId" placeholder="my-storage-project-123" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cfg-storageBucket">Storage Bucket (storageBucket) <span class="required">*</span></label>
+              <input type="text" id="cfg-storageBucket" placeholder="my-storage-project-123.appspot.com" required>
+            </div>
+            <div class="form-group">
+              <label for="cfg-authDomain">Auth Domain (authDomain)</label>
+              <input type="text" id="cfg-authDomain" placeholder="my-storage-project-123.firebaseapp.com">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cfg-messagingSenderId">Messaging Sender ID</label>
+              <input type="text" id="cfg-messagingSenderId" placeholder="1029384756">
+            </div>
+            <div class="form-group">
+              <label for="cfg-appId">App ID (appId)</label>
+              <input type="text" id="cfg-appId" placeholder="1:1029384756:web:abcd...">
+            </div>
+          </div>
+        </form>
+
+        <!-- JSON paste view -->
+        <div id="json-paste-view" style="display: none;">
+          <label for="json-paste-area" class="label-json">Paste your <code>const firebaseConfig = { ... }</code> from Firebase Console:</label>
+          <textarea id="json-paste-area" rows="7" class="json-textarea" placeholder="const firebaseConfig = {
+  apiKey: &quot;AIzaSy...&quot;,
+  authDomain: &quot;...&quot;,
+  projectId: &quot;...&quot;,
+  storageBucket: &quot;...&quot;,
+  messagingSenderId: &quot;...&quot;,
+  appId: &quot;...&quot;
+};"></textarea>
+          <button class="btn btn-secondary btn-sm" id="btn-parse-json">Parse & Fill Fields</button>
+        </div>
+
+        <div class="rules-tip">
+          <strong>⚠️ Don't forget Storage Rules:</strong> In Firebase Console &gt; Storage &gt; Rules, set read/write permissions for testing (see the Guide tab for exact code).
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="reset-demo-btn">Switch to Demo Mode</button>
+        <div class="footer-right-buttons">
+          <button class="btn btn-secondary" id="cancel-config-btn">Cancel</button>
+          <button class="btn btn-primary" id="save-config-btn">Save & Connect</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Step-by-Step Student Setup Guide                                   -->
+  <!-- ========================================================================= -->
+  <div class="modal-overlay" id="guide-modal" style="display: none;">
+    <div class="modal modal-lg guide-modal">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="guide-badge">📚 Step-by-Step Tutorial</span>
+          <h3 class="modal-title">How to Set Up & Run CloudBox with Firebase</h3>
+        </div>
+        <button class="modal-close-btn" id="close-guide-modal" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body guide-body">
+        <div class="guide-steps">
+          
+          <!-- Step 1 -->
+          <div class="guide-step-card">
+            <div class="step-num">1</div>
+            <div class="step-details">
+              <h4>Create a Free Firebase Project</h4>
+              <p>Navigate to <a href="https://console.firebase.google.com/" target="_blank" rel="noopener" class="guide-link">console.firebase.google.com</a> and sign in with your Google account.</p>
+              <ul>
+                <li>Click <strong>"Add project"</strong> (or "Create a project").</li>
+                <li>Enter a project name (e.g. <code>my-cloud-storage</code>).</li>
+                <li>Disable Google Analytics (optional for simplicity) and click <strong>"Create Project"</strong>.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="guide-step-card">
+            <div class="step-num">2</div>
+            <div class="step-details">
+              <h4>Enable Firebase Storage</h4>
+              <p>In the left sidebar of your Firebase Console:</p>
+              <ul>
+                <li>Click on <strong>"Build"</strong> &gt; <strong>"Storage"</strong>.</li>
+                <li>Click <strong>"Get started"</strong>.</li>
+                <li>Choose <strong>"Start in test mode"</strong> (or default rules) and click Next.</li>
+                <li>Select your Cloud Storage location (e.g. <code>us-central1</code> or nearest) and click <strong>"Done"</strong>.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="guide-step-card">
+            <div class="step-num">3</div>
+            <div class="step-details">
+              <h4>Configure Storage Security Rules</h4>
+              <p>To allow file uploads and downloads during development and learning, update your rules:</p>
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span>Firebase Storage Rules</span>
+                  <button class="copy-code-btn" id="copy-rules-btn">Copy Rules</button>
+                </div>
+                <pre><code>rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}</code></pre>
+              </div>
+              <p class="small-tip">Click <strong>"Publish"</strong> in the Firebase Rules tab to apply these changes.</p>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="guide-step-card">
+            <div class="step-num">4</div>
+            <div class="step-details">
+              <h4>Get Your Web App Config</h4>
+              <ul>
+                <li>In Firebase Console, click the ⚙️ <strong>Project settings</strong> gear in the left sidebar.</li>
+                <li>Scroll down to the <strong>"Your apps"</strong> section.</li>
+                <li>Click the Web icon <code>&lt;/&gt;</code> to register an app (name it e.g. <code>CloudBox Web</code>).</li>
+                <li>Copy the generated <code>firebaseConfig</code> values into <code class="code-inline">js/firebase-config.js</code> or paste them via the <strong>"Firebase Setup"</strong> button in this app!</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="guide-step-card">
+            <div class="step-num">5</div>
+            <div class="step-details">
+              <h4>Run the Project Locally</h4>
+              <p>Because ES Modules are used, run this project through any lightweight local HTTP server:</p>
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span>Option A: VS Code Live Server</span>
+                </div>
+                <pre><code>Right-click index.html -> "Open with Live Server"</code></pre>
+              </div>
+              <div class="code-box" style="margin-top: 8px;">
+                <div class="code-box-header">
+                  <span>Option B: Python (Terminal)</span>
+                </div>
+                <pre><code>python -m http.server 3000</code></pre>
+              </div>
+              <div class="code-box" style="margin-top: 8px;">
+                <div class="code-box-header">
+                  <span>Option C: Node.js npx (Terminal)</span>
+                </div>
+                <pre><code>npx serve .</code></pre>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="guide-done-btn">Got It! Let's Test</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Main JavaScript App Entry Point -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
